@@ -1,13 +1,13 @@
 import React from 'react';
 import {
+  Alert,
+  Pressable,
   StyleSheet,
   Text,
-  View,
   TextInput,
-  Pressable,
+  View,
 } from 'react-native';
-
-const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+import Passage from 'passage-react-native';
 
 const Login: () => JSX.Element = () => {
 
@@ -16,31 +16,55 @@ const Login: () => JSX.Element = () => {
   const [emailInput, setEmailInput] = React.useState('');
 
   const onChangeInput = (input: string) => {
+    const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const inputIsValidEmail = emailRegex.test(input);
     setValidEmail(inputIsValidEmail);
-    setEmailInput(emailInput);
+    setEmailInput(input);
+  };
+
+  const onPressContinue = async () => {
+    try {
+      const authResult = showLogin
+        ? await Passage.loginWithPasskey()
+        : await Passage.registerWithPasskey(emailInput);
+      console.log(authResult.authToken);
+      // TODO: Handle successful auth event (PSG-2252)
+    } catch (error) {
+      // TODO: Handle more granular errors once they're available (PSG-2281)
+      Alert.alert(
+        'Problem authenticating',
+        'Please try again',
+        [{
+          text: 'Dismiss',
+          style: 'cancel',
+        }]
+      );
+      console.error(error)
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{ showLogin ? 'Login' : 'Register' }</Text>
       <TextInput
-        style={styles.input}
-        placeholder='example@email.com'
-        keyboardType='email-address'
-        returnKeyType='done'
-        autoCorrect={false}
-        textContentType='emailAddress'
         autoCapitalize='none'
         autoComplete='email'
+        autoCorrect={false}
+        keyboardType='email-address'
         onChangeText={onChangeInput}
+        onFocus={() => showLogin && onPressContinue()}
+        placeholder='example@email.com'
+        returnKeyType='done'
+        style={styles.input}
+        textContentType='emailAddress'
       />
       <Pressable
+        disabled={!validEmail}
+        onPress={onPressContinue}
         style={[
           styles.primaryButton,
           { opacity: validEmail ? 1.0 : 0.3 }
         ]}
-        disabled={!validEmail}
       >
         <Text style={styles.primaryButtonText}>Continue</Text>
       </Pressable>
@@ -48,7 +72,13 @@ const Login: () => JSX.Element = () => {
         onPress={() => setShowLogin(!showLogin)}
         style={styles.secondaryButton}
       >
-        <Text style={styles.secondaryButtonText}>{ showLogin ? "Don't have an account? Register" : 'Already have an account? Login' }</Text>
+        <Text style={styles.secondaryButtonText}>
+          {
+            showLogin
+              ? "Don't have an account? Register"
+              : 'Already have an account? Login'
+          }
+        </Text>
       </Pressable>
     </View>
   );
@@ -60,34 +90,34 @@ const styles = StyleSheet.create({
     padding: 22,
   },
   title: {
+    color: 'black',
     fontSize: 18,
     fontWeight: '800',
-    textAlign: 'center',
     marginVertical: 18,
-    color: 'black',
+    textAlign: 'center',
   },
   input: {
-    borderWidth: 1,
     borderColor: 'lightgray',
     borderRadius: 9,
-    padding: 10,
+    borderWidth: 1,
     marginBottom: 12,
+    padding: 10,
   },
   primaryButton: {
-    height: 44,
-    backgroundColor: '#3D53F6',
     alignItems: 'center',
+    backgroundColor: '#3D53F6',
+    borderRadius: 8,
+    height: 44,
     justifyContent: 'center',
     paddingHorizontal: 12,
-    borderRadius: 8,
   },
   primaryButtonText: {
     color: 'white',
     fontWeight: '600',
   },
   secondaryButton: {
-    height: 44,
     alignItems: 'center',
+    height: 44,
     justifyContent: 'center',
     marginTop: 12,
   },

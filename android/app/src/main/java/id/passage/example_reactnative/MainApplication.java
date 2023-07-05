@@ -1,6 +1,8 @@
-package com.examplereactnative;
+package id.passage.example_reactnative;
 
 import android.app.Application;
+
+import com.examplereactnative.ReactNativeFlipper;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
