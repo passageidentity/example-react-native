@@ -4,8 +4,8 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:try.passage.id</string>
-		<string>applinks:try.passage.id</string>
+		<string>webcredentials:YOUR_AUTH_ORIGIN</string>
+		<string>applinks:YOUR_AUTH_ORIGIN</string>
 	</array>
 </dict>
 </plist>
