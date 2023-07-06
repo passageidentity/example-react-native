@@ -2,12 +2,13 @@ import React from 'react';
 import {
   Alert,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import Passage from 'passage-react-native';
+
+import { styles } from '../styles';
 
 const Login: () => JSX.Element = () => {
 
@@ -83,49 +84,5 @@ const Login: () => JSX.Element = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'stretch',
-    padding: 22,
-  },
-  title: {
-    color: 'black',
-    fontSize: 18,
-    fontWeight: '800',
-    marginVertical: 18,
-    textAlign: 'center',
-  },
-  input: {
-    borderColor: 'lightgray',
-    borderRadius: 9,
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
-  },
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: '#3D53F6',
-    borderRadius: 8,
-    height: 44,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    height: 44,
-    justifyContent: 'center',
-    marginTop: 12,
-  },
-  secondaryButtonText: {
-    color: '#3D53F6',
-    fontWeight: '600',
-    opacity: 0.8,
-  },
-});
 
 export default Login;
