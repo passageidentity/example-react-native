@@ -7,24 +7,27 @@ import {
 } from 'react-native';
 import Passage from 'passage-react-native';
 
+import { usePassage } from '../contexts/PassageContext';
 import { styles } from '../styles';
 
-type MagicLinkProps = {
-  magicLinkId: string,
-  identifier: string,
-  isNewUser: boolean,
-};
+export const MagicLink: () => JSX.Element = () => {
 
-const MagicLink: (props: MagicLinkProps) => JSX.Element = ({ magicLinkId, identifier, isNewUser }) => {
+  const {
+    isNewUser,
+    setCurrentUser,
+    userIdentifer,
+    authFallbackId,
+  } = usePassage();
 
   const [newMagicLinkId, setNewMagicLinkId] = React.useState<string | null>(null);
 
   const checkMagicLink = async () => {
     try {
-      const authResult = await Passage.getMagicLinkStatus(newMagicLinkId || magicLinkId);
+      const authResult = await Passage.getMagicLinkStatus(newMagicLinkId || authFallbackId!);
       if (authResult?.authToken !== null) {
         console.log(authResult!.authToken);
-        // TODO: Handle successful auth event (PSG-2252)
+        const user = await Passage.getCurrentUser();
+        setCurrentUser(user);
       }
     } catch (error) {
       console.error(error);
@@ -35,7 +38,9 @@ const MagicLink: (props: MagicLinkProps) => JSX.Element = ({ magicLinkId, identi
     try {
       const authResult = await Passage.magicLinkActivate(magicLink);
       console.log(authResult.authToken);
-      // TODO: Handle successful auth event (PSG-2252)
+      const user = await Passage.getCurrentUser();
+      setCurrentUser(user);
+      // PICK UP HERE - got Android working, not iOS
     } catch (error) {
       console.error(error);
     }
@@ -44,8 +49,8 @@ const MagicLink: (props: MagicLinkProps) => JSX.Element = ({ magicLinkId, identi
   const onPressResend = async () => {
     try {
       const id = isNewUser
-        ? await Passage.newRegisterMagicLink(identifier)
-        : await Passage.newLoginMagicLink(identifier);
+        ? await Passage.newRegisterMagicLink(userIdentifer!)
+        : await Passage.newLoginMagicLink(userIdentifer!);
       setNewMagicLinkId(id);
       Alert.alert(
         'Magic link resent',
@@ -83,7 +88,7 @@ const MagicLink: (props: MagicLinkProps) => JSX.Element = ({ magicLinkId, identi
       <Text style={styles.title}>{`Check email to ${isNewUser ? 'Register' : 'Login'}`}</Text>
       <Text style={styles.body}>
         {
-          `A one-time link has been sent to\n${identifier}\nYou will be logged in here once you click that link.`
+          `A one-time link has been sent to\n${userIdentifer}\nYou will be logged in here once you click that link.`
         }
       </Text>
       <Pressable
@@ -95,5 +100,3 @@ const MagicLink: (props: MagicLinkProps) => JSX.Element = ({ magicLinkId, identi
     </View>
   );
 };
-
-export default MagicLink;

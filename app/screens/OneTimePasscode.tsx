@@ -9,14 +9,16 @@ import {
 import Passage from 'passage-react-native';
 
 import { styles } from '../styles';
+import { usePassage } from '../contexts/PassageContext';
 
-type OneTimePasscodeProps = {
-  otpId: string,
-  identifier: string,
-  isNewUser: boolean,
-};
+export const OneTimePasscode: () => JSX.Element = () => {
 
-const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, identifier, isNewUser }) => {
+  const {
+    isNewUser,
+    setCurrentUser,
+    userIdentifer,
+    authFallbackId,
+  } = usePassage();
 
   const [otpInput, setOtpInput] = React.useState('');
   const [isOtpValid, setIsOtpValid] = React.useState(false);
@@ -30,9 +32,10 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
 
   const onPressContinue = async () => {
     try {
-      const authResult = await Passage.oneTimePasscodeActivate(otpInput, newOtpId || otpId);
+      const authResult = await Passage.oneTimePasscodeActivate(otpInput, newOtpId || authFallbackId!);
       console.log(authResult.authToken);
-      // TODO: Handle successful auth event (PSG-2252)
+      const user = await Passage.getCurrentUser();
+      setCurrentUser(user);
     } catch (error) {
       Alert.alert(
         'Problem with passcode',
@@ -49,8 +52,8 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
   const onPressResend = async () => {
     try {
       const id = isNewUser
-        ? await Passage.newRegisterOneTimePasscode(identifier)
-        : await Passage.newLoginOneTimePasscode(identifier);
+        ? await Passage.newRegisterOneTimePasscode(userIdentifer!)
+        : await Passage.newLoginOneTimePasscode(userIdentifer!);
       setNewOtpId(id);
       Alert.alert(
         'Passcode resent',
@@ -78,7 +81,7 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
       <Text style={styles.title}>Enter code</Text>
       <Text style={styles.body}>
         {
-          `A one-time code has been sent to\n${identifier}\nEnter the code here to ${isNewUser ? 'register' : 'login'}.`
+          `A one-time code has been sent to\n${userIdentifer}\nEnter the code here to ${isNewUser ? 'register' : 'login'}.`
         }
       </Text>
       <TextInput
@@ -111,5 +114,3 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
     </View>
   );
 };
-
-export default OneTimePasscode;

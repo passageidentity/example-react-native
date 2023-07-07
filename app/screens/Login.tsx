@@ -9,8 +9,11 @@ import {
 import Passage from 'passage-react-native';
 
 import { styles } from '../styles';
+import { PassageProvider, usePassage, AuthState } from '../contexts/PassageContext';
 
-const Login: () => JSX.Element = () => {
+export const Login: () => JSX.Element = () => {
+
+  const { setCurrentUser } = usePassage();
 
   const [showLogin, setShowLogin] = React.useState(false);
   const [validEmail, setValidEmail] = React.useState(false);
@@ -29,7 +32,9 @@ const Login: () => JSX.Element = () => {
         ? await Passage.loginWithPasskey()
         : await Passage.registerWithPasskey(emailInput);
       console.log(authResult.authToken);
-      // TODO: Handle successful auth event (PSG-2252)
+      const user = await Passage.getCurrentUser();
+      console.log(user)
+      setCurrentUser(user);
     } catch (error) {
       // TODO: Handle more granular errors once they're available (PSG-2281)
       Alert.alert(
@@ -84,5 +89,3 @@ const Login: () => JSX.Element = () => {
     </View>
   );
 };
-
-export default Login;
