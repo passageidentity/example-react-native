@@ -6,14 +6,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Passage from 'passage-react-native';
+import Passage, { AllowedFallbackAuth } from 'passage-react-native';
 
 import { styles } from '../styles';
-import { PassageProvider, usePassage, AuthState } from '../contexts/PassageContext';
+import { usePassage, AuthState } from '../contexts/PassageContext';
 
 export const Login: () => JSX.Element = () => {
 
-  const { setCurrentUser } = usePassage();
+  const { setCurrentUser, setAuthFallbackId, setAuthState, setIsNewUser, setUserIdentifier } = usePassage();
 
   const [showLogin, setShowLogin] = React.useState(false);
   const [validEmail, setValidEmail] = React.useState(false);
@@ -28,15 +28,38 @@ export const Login: () => JSX.Element = () => {
 
   const onPressContinue = async () => {
     try {
-      const authResult = showLogin
+      showLogin
         ? await Passage.loginWithPasskey()
         : await Passage.registerWithPasskey(emailInput);
-      console.log(authResult.authToken);
       const user = await Passage.getCurrentUser();
-      console.log(user)
       setCurrentUser(user);
     } catch (error) {
+      await attemptFallbackAuth();
       // TODO: Handle more granular errors once they're available (PSG-2281)
+      console.error(error);
+    }
+  };
+
+  const attemptFallbackAuth = async () => {
+    try {
+      const appInfo = await Passage.getAppInfo();
+      if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
+        const otpId = showLogin
+          ? await Passage.newLoginOneTimePasscode(emailInput)
+          : await Passage.newRegisterOneTimePasscode(emailInput)
+          setAuthFallbackId(otpId);
+          setAuthState(AuthState.AwaitingVerificationOTP);
+      } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
+        const magicLinkId = showLogin
+          ? await Passage.newLoginMagicLink(emailInput)
+          : await Passage.newRegisterMagicLink(emailInput)
+        setAuthFallbackId(magicLinkId);
+        setAuthState(AuthState.AwaitingVerificationMagicLink);
+      }
+      setIsNewUser(!showLogin);
+      setUserIdentifier(emailInput);
+    } catch (error) {
+      console.error(error);
       Alert.alert(
         'Problem authenticating',
         'Please try again',
@@ -45,7 +68,6 @@ export const Login: () => JSX.Element = () => {
           style: 'cancel',
         }]
       );
-      console.error(error)
     }
   };
 

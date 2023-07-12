@@ -3,6 +3,7 @@ import Passage, { PassageUser } from 'passage-react-native';
 
 interface PassageContextType {
   authState: AuthState;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
   isNewUser: boolean;
   setIsNewUser: React.Dispatch<React.SetStateAction<boolean>>;
   currentUser: PassageUser | null;
@@ -44,6 +45,19 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       setAuthState(AuthState.Unauthenticated);
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    checkForAuthenticatedUser();
+  }, []);
+
+  const checkForAuthenticatedUser = async () => {
+    try {
+      const user = await Passage.getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const value = {
     authState,
