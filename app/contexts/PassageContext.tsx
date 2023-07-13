@@ -12,6 +12,7 @@ interface PassageContextType {
   setAuthFallbackId: React.Dispatch<React.SetStateAction<string | null>>;
   userIdentifer: string | null;
   setUserIdentifier: React.Dispatch<React.SetStateAction<string | null>>;
+  signOut: () => void;
 }
 
 export enum AuthState {
@@ -59,6 +60,11 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signOut = async () => {
+    await Passage.signOut()
+    setCurrentUser(null);
+  }
+
   const value = {
     authState,
     setAuthState,
@@ -70,6 +76,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     setAuthFallbackId,
     userIdentifer,
     setUserIdentifier,
+    signOut,
   };
 
   return <PassageContext.Provider value={value}>{children}</PassageContext.Provider>;
