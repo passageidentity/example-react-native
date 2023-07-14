@@ -186,7 +186,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   /**
    * This example app does not include deep link handling.
    * If you set up deep linking for your app, you'll be able to extract the magic link from the url
-   * and use activate it like this.
+   * and activate it like this.
    */
   const handleDeepMagicLink = async (magicLink: string) => {
     try {
