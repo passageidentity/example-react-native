@@ -1,28 +1,22 @@
 import React from 'react';
-import {
-  Alert,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Passage from 'passage-react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { styles } from '../styles';
-import { usePassage } from '../contexts/PassageContext';
+import { usePassage, AuthState } from '../contexts/PassageContext';
 
 export const OneTimePasscode: () => JSX.Element = () => {
 
   const {
-    isNewUser,
-    setCurrentUser,
+    activateOTP,
+    resendOTP,
+    authState,
     userIdentifer,
-    authFallbackId,
   } = usePassage();
 
   const [otpInput, setOtpInput] = React.useState('');
   const [isOtpValid, setIsOtpValid] = React.useState(false);
-  const [newOtpId, setNewOtpId] = React.useState<string | null>(null);
+
+  const isNewUser = authState === AuthState.AwaitingRegisterVerificationOTP;
 
   const onChangeInput = (input: string) => {
     const inputIsValidOTP = input.length > 5;
@@ -31,50 +25,12 @@ export const OneTimePasscode: () => JSX.Element = () => {
   };
 
   const onPressContinue = async () => {
-    try {
-      const authResult = await Passage.oneTimePasscodeActivate(otpInput, newOtpId || authFallbackId!);
-      console.log(authResult.authToken);
-      const user = await Passage.getCurrentUser();
-      setCurrentUser(user);
-    } catch (error) {
-      Alert.alert(
-        'Problem with passcode',
-        'Please try again',
-        [{
-          text: 'Dismiss',
-          style: 'cancel',
-        }]
-      );
-      console.error(error)
-    }
+    await activateOTP(otpInput);
   };
 
   const onPressResend = async () => {
-    try {
-      const id = isNewUser
-        ? await Passage.newRegisterOneTimePasscode(userIdentifer!)
-        : await Passage.newLoginOneTimePasscode(userIdentifer!);
-      setNewOtpId(id);
-      Alert.alert(
-        'Passcode resent',
-        undefined,
-        [{
-          text: 'Okay',
-          style: 'cancel',
-        }]
-      );
-    } catch (error) {
-      Alert.alert(
-        'Problem resending passcode',
-        'Please try again',
-        [{
-          text: 'Dismiss',
-          style: 'cancel',
-        }]
-      );
-      console.error(error)
-    }
-  }
+    await resendOTP();
+  };
 
   return (
     <View style={styles.container}>

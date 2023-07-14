@@ -1,32 +1,16 @@
 import React from 'react';
-import {
-  Alert,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Passage from 'passage-react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { styles } from '../styles';
 import { usePassage } from '../contexts/PassageContext';
+import { styles } from '../styles';
 
 export const Welcome: () => JSX.Element = () => {
 
-  const { currentUser, signOut } = usePassage();
+  const { currentUser, signOut, addPasskey } = usePassage();
 
   if (!currentUser) {
     return <></>;
   }
-
-  const addPasskey = async () => {
-    try {
-      const passkey = await Passage.addDevicePasskey();
-      console.log(passkey);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <View style={styles.container}>
