@@ -21,7 +21,7 @@ export const Login: () => JSX.Element = () => {
 
   const onPressContinue = async () => {
     if (showLogin) {
-      await login(emailInput)
+      await login(emailInput);
     } else {
       await register(emailInput);
     }

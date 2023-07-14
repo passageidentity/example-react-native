@@ -1,6 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert, AlertButton } from 'react-native';
-import Passage, { PassageUser, AllowedFallbackAuth } from 'passage-react-native';
+import Passage, {
+  PassageUser,
+  AllowedFallbackAuth,
+  PassageError,
+  PassageErrorCode,
+} from 'passage-react-native';
 
 interface PassageContextType {
   authState: AuthState;
@@ -36,7 +41,7 @@ export const usePassage = () => {
 }
 
 export function PassageProvider({ children }: { children: React.ReactNode }) {
-  
+
   const [currentUser, setCurrentUser] = useState<PassageUser | null>(null);
   const [authState, setAuthState] = useState<AuthState>(AuthState.Unauthenticated);
   const [authFallbackId, setAuthFallbackId] = useState<string | null>(null);
@@ -51,6 +56,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       setAuthState(AuthState.Authenticated);
     } else {
       setAuthState(AuthState.Unauthenticated);
+      setUserIdentifier(null);
     }
   }, [currentUser]);
 
@@ -72,9 +78,11 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const user = await Passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
-      // If error == user cancelled, do nothing, else:
-      console.error(error);
-      fallbackLogin(identifier);
+      if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
+        // User cancelled native passkey prompt, do nothing.
+      } else {
+        fallbackLogin(identifier);
+      }
     }
   };
 
@@ -102,9 +110,11 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const user = await Passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
-      // If error == user cancelled, do nothing, else:
-      console.error(error);
-      fallbackRegister(identifier);
+      if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
+        // User cancelled native passkey prompt, do nothing.
+      } else {
+        fallbackRegister(identifier);
+      }
     }
   };
 
@@ -156,16 +166,16 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
         setCurrentUser(user);
       }
     } catch (error) {
-      // Magic link not activated, do nothing.
+      // Magic link not activated yet, do nothing.
     }
   };
 
   const resendMagicLink = async () => {
     const isNewUser = authState === AuthState.AwaitingRegisterVerificationMagicLink;
     try {
-      const newMagicLinkId = isNewUser
-        ? await Passage.newRegisterMagicLink(userIdentifer!)
-        : await Passage.newLoginMagicLink(userIdentifer!);
+      const newMagicLinkId = isNewUser ?
+        await Passage.newRegisterMagicLink(userIdentifer!) :
+        await Passage.newLoginMagicLink(userIdentifer!);
       setAuthFallbackId(newMagicLinkId);
       presentAlert('Success', 'Magic link resent');
     } catch (error) {
@@ -173,6 +183,11 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  /**
+   * This example app does not include deep link handling.
+   * If you set up deep linking for your app, you'll be able to extract the magic link from the url
+   * and use activate it like this.
+   */
   const handleDeepMagicLink = async (magicLink: string) => {
     try {
       await Passage.magicLinkActivate(magicLink);
