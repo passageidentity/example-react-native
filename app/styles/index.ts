@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  app: {
+    backgroundColor: 'white',
+    flex: 1,
+  },
   container: {
     alignItems: 'stretch',
     padding: 22,

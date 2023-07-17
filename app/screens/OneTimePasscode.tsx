@@ -1,26 +1,22 @@
 import React from 'react';
-import {
-  Alert,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Passage from 'passage-react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { styles } from '../styles';
+import { usePassage, AuthState } from '../contexts/PassageContext';
 
-type OneTimePasscodeProps = {
-  otpId: string,
-  identifier: string,
-  isNewUser: boolean,
-};
+export const OneTimePasscode: () => JSX.Element = () => {
 
-const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, identifier, isNewUser }) => {
+  const {
+    activateOTP,
+    resendOTP,
+    authState,
+    userIdentifer,
+  } = usePassage();
 
   const [otpInput, setOtpInput] = React.useState('');
   const [isOtpValid, setIsOtpValid] = React.useState(false);
-  const [newOtpId, setNewOtpId] = React.useState<string | null>(null);
+
+  const isNewUser = authState === AuthState.AwaitingRegisterVerificationOTP;
 
   const onChangeInput = (input: string) => {
     const inputIsValidOTP = input.length > 5;
@@ -29,56 +25,19 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
   };
 
   const onPressContinue = async () => {
-    try {
-      const authResult = await Passage.oneTimePasscodeActivate(otpInput, newOtpId || otpId);
-      console.log(authResult.authToken);
-      // TODO: Handle successful auth event (PSG-2252)
-    } catch (error) {
-      Alert.alert(
-        'Problem with passcode',
-        'Please try again',
-        [{
-          text: 'Dismiss',
-          style: 'cancel',
-        }]
-      );
-      console.error(error)
-    }
+    await activateOTP(otpInput);
   };
 
   const onPressResend = async () => {
-    try {
-      const id = isNewUser
-        ? await Passage.newRegisterOneTimePasscode(identifier)
-        : await Passage.newLoginOneTimePasscode(identifier);
-      setNewOtpId(id);
-      Alert.alert(
-        'Passcode resent',
-        undefined,
-        [{
-          text: 'Okay',
-          style: 'cancel',
-        }]
-      );
-    } catch (error) {
-      Alert.alert(
-        'Problem resending passcode',
-        'Please try again',
-        [{
-          text: 'Dismiss',
-          style: 'cancel',
-        }]
-      );
-      console.error(error)
-    }
-  }
+    await resendOTP();
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enter code</Text>
       <Text style={styles.body}>
         {
-          `A one-time code has been sent to\n${identifier}\nEnter the code here to ${isNewUser ? 'register' : 'login'}.`
+          `A one-time code has been sent to\n${userIdentifer}\nEnter the code here to ${isNewUser ? 'register' : 'login'}.`
         }
       </Text>
       <TextInput
@@ -111,5 +70,3 @@ const OneTimePasscode: (props: OneTimePasscodeProps) => JSX.Element = ({ otpId, 
     </View>
   );
 };
-
-export default OneTimePasscode;

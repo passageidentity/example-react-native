@@ -1,29 +1,42 @@
 import React from 'react';
+import { SafeAreaView, StatusBar } from 'react-native';
+
+import { PassageProvider, usePassage, AuthState } from './contexts/PassageContext';
 import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-} from 'react-native';
+  Login,
+  MagicLink,
+  OneTimePasscode,
+  Welcome,
+} from './screens';
+import { styles } from './styles';
 
-import Login from './screens/Login';
+const Screen: () => JSX.Element = () => {
+  const { authState } = usePassage();
+  switch (+authState) {
+    case AuthState.Unauthenticated:
+      return <Login />;
+    case AuthState.AwaitingRegisterVerificationMagicLink, AuthState.AwaitingLoginVerificationMagicLink:
+      return <MagicLink />;
+    case AuthState.AwaitingRegisterVerificationOTP, AuthState.AwaitingLoginVerificationOTP:
+      return <OneTimePasscode />;
+    case AuthState.Authenticated:
+      return <Welcome />;
+    default: return <></>;
+  }
+};
 
-function App(): JSX.Element {
+const App: () => JSX.Element = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.app}>
       <StatusBar
         barStyle='dark-content'
         backgroundColor='white'
       />
-      <Login />
+      <PassageProvider>
+        <Screen />
+      </PassageProvider>
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    flex: 1,
-  },
-});
+};
 
 export default App;

@@ -1,16 +1,12 @@
 import React from 'react';
-import {
-  Alert,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Passage from 'passage-react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { styles } from '../styles';
+import { usePassage } from '../contexts/PassageContext';
 
-const Login: () => JSX.Element = () => {
+export const Login: () => JSX.Element = () => {
+
+  const { login, register } = usePassage();
 
   const [showLogin, setShowLogin] = React.useState(false);
   const [validEmail, setValidEmail] = React.useState(false);
@@ -24,23 +20,10 @@ const Login: () => JSX.Element = () => {
   };
 
   const onPressContinue = async () => {
-    try {
-      const authResult = showLogin
-        ? await Passage.loginWithPasskey()
-        : await Passage.registerWithPasskey(emailInput);
-      console.log(authResult.authToken);
-      // TODO: Handle successful auth event (PSG-2252)
-    } catch (error) {
-      // TODO: Handle more granular errors once they're available (PSG-2281)
-      Alert.alert(
-        'Problem authenticating',
-        'Please try again',
-        [{
-          text: 'Dismiss',
-          style: 'cancel',
-        }]
-      );
-      console.error(error)
+    if (showLogin) {
+      await login(emailInput);
+    } else {
+      await register(emailInput);
     }
   };
 
@@ -84,5 +67,3 @@ const Login: () => JSX.Element = () => {
     </View>
   );
 };
-
-export default Login;
