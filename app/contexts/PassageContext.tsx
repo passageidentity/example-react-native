@@ -215,7 +215,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const addPasskey = async () => {
     try {
-      await Passage.addDevicePasskey();
+      await Passage.addPasskey();
       // Get updated user to get new list of passkeys.
       const user = await Passage.getCurrentUser();
       setCurrentUser(user);
