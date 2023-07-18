@@ -12,12 +12,14 @@ import { styles } from './styles';
 
 const Screen: () => JSX.Element = () => {
   const { authState } = usePassage();
-  switch (+authState) {
+  switch (authState) {
     case AuthState.Unauthenticated:
       return <Login />;
-    case AuthState.AwaitingRegisterVerificationMagicLink, AuthState.AwaitingLoginVerificationMagicLink:
+    case AuthState.AwaitingRegisterVerificationMagicLink:
+    case AuthState.AwaitingLoginVerificationMagicLink:
       return <MagicLink />;
-    case AuthState.AwaitingRegisterVerificationOTP, AuthState.AwaitingLoginVerificationOTP:
+    case AuthState.AwaitingRegisterVerificationOTP:
+    case AuthState.AwaitingLoginVerificationOTP:
       return <OneTimePasscode />;
     case AuthState.Authenticated:
       return <Welcome />;
