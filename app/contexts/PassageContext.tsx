@@ -11,11 +11,12 @@ interface PassageContextType {
   authState: AuthState;
   currentUser: PassageUser | null;
   userIdentifer: string | null;
+  authFallbackId: string | null;
   login: (identifier: string) => Promise<void>;
   register: (identifier: string) => Promise<void>;
   activateOTP: (otp: string) => Promise<void>;
   resendOTP: () => Promise<void>;
-  checkMagicLink: () => Promise<void>;
+  checkMagicLink: (magicLinkId: string | null) => Promise<void>;
   resendMagicLink: () => Promise<void>;
   addPasskey: () => Promise<void>;
   signOut: () => void;
@@ -48,7 +49,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   const [userIdentifer, setUserIdentifier] = useState<string | null>(null);
 
   useEffect(() => {
-    checkForAuthenticatedUser();
+    onAppStart();
   }, []);
 
   useEffect(() => {
@@ -60,16 +61,28 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentUser]);
 
-  const checkForAuthenticatedUser = async () => {
-    try {
-      const user = await Passage.getCurrentUser();
-      setCurrentUser(user);
-      if (user) {
-        await Passage.refreshAuthToken();
+  const onAppStart = async () => {
+    await checkAndRefreshToken();
+    await checkForAuthenticatedUser();
+  };
+
+  const checkAndRefreshToken = async () => {
+    const authToken = await Passage.getAuthToken();
+    if (authToken) {
+      const authTokenIsValid = await Passage.isAuthTokenValid(authToken);
+      if (!authTokenIsValid) {
+        try {
+          await Passage.refreshAuthToken();
+        } catch (error) {
+          // If error, refresh token is likely expired. User will be signed out.
+        }
       }
-    } catch (error) {
-      console.error(error);
     }
+  };
+
+  const checkForAuthenticatedUser = async () => {
+    const user = await Passage.getCurrentUser();
+    setCurrentUser(user);
   };
 
   const login = async (identifier: string) => {
@@ -81,7 +94,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
         // User cancelled native passkey prompt, do nothing.
       } else {
-        fallbackLogin(identifier);
+        if (identifier.length) {
+          await fallbackLogin(identifier);
+        }
       }
     }
   };
@@ -113,7 +128,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
         // User cancelled native passkey prompt, do nothing.
       } else {
-        fallbackRegister(identifier);
+        await fallbackRegister(identifier);
       }
     }
   };
@@ -158,9 +173,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const checkMagicLink = async () => {
+  const checkMagicLink = async (magicLinkId: string | null) => {
     try {
-      const authResult = await Passage.getMagicLinkStatus(authFallbackId!);
+      const authResult = await Passage.getMagicLinkStatus(magicLinkId!);
       if (authResult !== null) {
         const user = await Passage.getCurrentUser();
         setCurrentUser(user);
@@ -223,6 +238,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     authState,
     currentUser,
     userIdentifer,
+    authFallbackId,
     signOut,
     login,
     register,
