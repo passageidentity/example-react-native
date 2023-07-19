@@ -16,10 +16,23 @@ export const styles = StyleSheet.create({
     marginVertical: 18,
     textAlign: 'center',
   },
+  subtitle: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: '500',
+    marginVertical: 12,
+    textAlign: 'center',
+  },
   body: {
     color: 'black',
     fontSize: 14,
     marginVertical: 18,
+    textAlign: 'center',
+  },
+  listItem: {
+    color: 'black',
+    fontSize: 14,
+    marginVertical: 8,
     textAlign: 'center',
   },
   input: {
