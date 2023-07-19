@@ -5,7 +5,7 @@ import Passage, {
   AllowedFallbackAuth,
   PassageError,
   PassageErrorCode,
-} from 'passage-react-native';
+} from '@passageidentity/passage-react-native';
 
 interface PassageContextType {
   authState: AuthState;
