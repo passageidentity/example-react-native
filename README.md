@@ -19,7 +19,10 @@ A successful registration flow will look like this:
 - Android Studio Electric Eel or newer
 - Xcode 14 or newer
 - A Passage account and Passage app (you can register for a free account [here](https://passage.id/))
-- Completed setup of Associated Domains (iOS) and Asset Links (Android) files (view instructions [here](https://docs.passage.id/mobile/cross-platform/react-native/add-passage))
+- Completed setup of
+  - Associated Domains file (iOS) ([view instructions](https://docs.passage.id/mobile/ios/add-passage#step-1-publish-associated-domains-file))
+  - Asset Links file (Android) ([view instructions](https://docs.passage.id/mobile/android/add-passage#step-1-publish-digital-asset-links-file))
+  - Key hash registration (Android) ([view instructions](https://docs.passage.id/mobile/android/add-passage#step-2-register-your-android-app-with-passage))
 
 ## Installation
 
