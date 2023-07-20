@@ -11,7 +11,7 @@
 
 A successful registration flow will look like this:
 
-<img src="https://storage.googleapis.com/passage-docs/passage_react_native_example.png" alt="Passage React Native Example" />
+<img src="https://storage.googleapis.com/passage-docs/passage_react_native_example_screens.png" alt="Passage React Native Example" />
 
 
 ## Requirements
