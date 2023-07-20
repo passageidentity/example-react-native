@@ -11,7 +11,8 @@
 
 A successful registration flow will look like this:
 
-<img width="1069" alt="Screenshot 2023-05-15 at 5 42 31 PM" src="https://github.com/passageidentity/example-android/assets/16176400/22c00338-2912-4275-a3a3-02282aa85e66">
+<img src="https://storage.googleapis.com/passage-docs/passage_react_native_example.png" alt="Passage React Native Example" />
+
 
 ## Requirements
 
@@ -29,17 +30,17 @@ cd ios && pod install && cd ..
 
 ## Configuration
 
-### Add app id and auth origin
+### Modify passage app id and authentication origin
 
-In the `strings.xml` file (ADD LINK) and `Passage.plist` file (ADD LINK) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/getting-started/creating-a-new-app).
+In the `strings.xml` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/android/app/src/main/res/values/strings.xml)) and `Passage.plist` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/ios/Passage.plist)) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/getting-started/creating-a-new-app).
 
-<img width="1011" alt="Screenshot 2023-05-15 at 5 54 58 PM" src="https://github.com/passageidentity/example-android/assets/16176400/6bd89ecd-12c7-4f1f-a2cc-2c2e1daa9dfc">
+<img width="600" alt="strings.xml screenshot" src="https://github.com/passageidentity/example-android/assets/16176400/6bd89ecd-12c7-4f1f-a2cc-2c2e1daa9dfc">
 
-(IOS SCREENSHOT HERE)
+<img width="600" alt="Passage.plist screenshot" src="https://storage.googleapis.com/passage-docs/passage-ios-plist.png">
 
-### Add iOS entitlement
-
-(SCREENSHOT HERE)
+### Modify iOS entitlement
+Open up Xcode and replace `YOUR_AUTH_ORIGIN` in the Associated Domains section.
+<img width="600" alt="Passage iOS entitlement setup" src="https://storage.googleapis.com/passage-docs/passage-ios-entitlements.png">
 
 ### 🚀 Run the app!
 
