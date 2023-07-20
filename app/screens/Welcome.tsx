@@ -16,9 +16,17 @@ export const Welcome: () => JSX.Element = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Welcome</Text>
       <Text style={styles.body}>{currentUser.email}</Text>
-      {currentUser.webauthnDevices.map((device) => (
-        <Text key={device.id} style={styles.body}>{device.friendlyName}</Text>
-      ))}
+      {
+        currentUser.webauthnDevices.length && 
+          <View style={{ marginBottom: 22 }}>
+            <Text style={styles.subtitle}>User passkeys</Text>
+            {currentUser.webauthnDevices.map((device) => (
+              <Text key={device.id} style={styles.listItem}>
+                {device.friendlyName}
+              </Text>
+            ))}
+          </View>
+      }
       <Pressable
         onPress={addPasskey}
         style={styles.primaryButton}
