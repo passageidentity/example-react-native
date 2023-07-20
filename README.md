@@ -1,79 +1,66 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<img src="https://storage.googleapis.com/passage-docs/passage-logo-gradient.svg" alt="Passage logo" style="width:250px;"/>
 
-# Getting Started
+# Example React Native App with Passage Auth
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+### 🔑 The easiest way to get passkeys up and running for React Native
 
-## Step 1: Start the Metro Server
+[Passage](https://passage.id/) and the [Passage React Native SDK](https://github.com/passageidentity/passage-react-native) were built to make passkey authentication as fast, simple, and secure as possible. This example application is a great place to start. Before using Passage in your own React Native app, you can use this example app to:
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+- Plug in your own Passage app credentials to see passkeys in action
+- Learn basic implementation of the Passage React Native SDK
 
-To start Metro, run the following command from the _root_ of your React Native project:
+A successful registration flow will look like this:
 
-```bash
-# using npm
-npm start
+<img src="https://storage.googleapis.com/passage-docs/passage_react_native_example_screens.png" alt="Passage React Native Example" />
 
-# OR using Yarn
-yarn start
-```
 
-## Step 2: Start your Application
+## Requirements
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+- Android Studio Electric Eel or newer
+- Xcode 14 or newer
+- A Passage account and Passage app (you can register for a free account [here](https://passage.id/))
+- Completed setup of
+  - Associated Domains file (iOS) ([view instructions](https://docs.passage.id/mobile/ios/add-passage#step-1-publish-associated-domains-file))
+  - Asset Links file (Android) ([view instructions](https://docs.passage.id/mobile/android/add-passage#step-1-publish-digital-asset-links-file))
+  - Key hash registration (Android) ([view instructions](https://docs.passage.id/mobile/android/add-passage#step-2-register-your-android-app-with-passage))
 
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
+## Installation
 
 ```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm install
+cd ios && pod install && cd ..
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+## Configuration
+To get this example React Native app working with your Passage account/app, you'll need to swap out the placeholder app id and authentication origin with your own. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/console-administration/apps#app-core-settings).
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
 
-## Step 3: Modifying your App
+### iOS
+In the `Passage.plist` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/ios/Passage.plist)) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively.
 
-Now that you have successfully run the app, let's modify it.
+<img width="600" alt="Passage.plist screenshot" src="https://storage.googleapis.com/passage-docs/passage-ios-plist.png">
+Also, you'll need to open up Xcode and replace `YOUR_AUTH_ORIGIN` in the Associated Domains section.
+<img width="600" alt="Passage iOS entitlement setup" src="https://storage.googleapis.com/passage-docs/passage-ios-entitlements.png">
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+### Android
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+In the `strings.xml` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/android/app/src/main/res/values/strings.xml)) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively.
 
-## Congratulations! :tada:
+```xml
+<resources>
+    <string name="app_name">ExampleReactNative</string>
 
-You've successfully run and modified your React Native App. :partying_face:
+    <!-- Required Passage app settings -->
+    <string name="passage_app_id">YOUR_APP_ID</string> 
+    <string name="passage_auth_origin">YOUR_APP_ORIGIN</string>
+    ...
+</resources>
+```
 
-### Now what?
+## 🚀 Run the app!
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+```bash
+npm run start
+```
 
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+If all of the configuration was setup correctly, you should be able to run this application in the simulator or a real device!
