@@ -19,7 +19,7 @@ A successful registration flow will look like this:
 - Android Studio Electric Eel or newer
 - Xcode 14 or newer
 - A Passage account and Passage app (you can register for a free account [here](https://passage.id/))
-- Completed registration of this example mobile app with your Passage app (view instructions [here](https://docs.passage.id/mobile/android/add-passage))
+- Completed registration of this example mobile app with your Passage app (view instructions [here](https://docs.passage.id/mobile/cross-platform/react-native/add-passage))
 
 ## Installation
 
