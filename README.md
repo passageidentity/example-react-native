@@ -32,7 +32,7 @@ cd ios && pod install && cd ..
 ```
 
 ## Configuration
-To get this example React Native app working with your Passage account/app, you'll need to swap out the placeholder app id and authentication origin with your own. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/getting-started/creating-a-new-app).
+To get this example React Native app working with your Passage account/app, you'll need to swap out the placeholder app id and authentication origin with your own. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/console-administration/apps#app-core-settings).
 
 
 ### iOS
