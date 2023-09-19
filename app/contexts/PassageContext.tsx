@@ -43,6 +43,8 @@ export const usePassage = () => {
 
 export function PassageProvider({ children }: { children: React.ReactNode }) {
 
+  const passage = new Passage('YOUR_APP_ID');
+
   const [currentUser, setCurrentUser] = useState<PassageUser | null>(null);
   const [authState, setAuthState] = useState<AuthState>(AuthState.Unauthenticated);
   const [authFallbackId, setAuthFallbackId] = useState<string | null>(null);
@@ -67,12 +69,12 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const checkAndRefreshToken = async () => {
-    const authToken = await Passage.getAuthToken();
+    const authToken = await passage.getAuthToken();
     if (authToken) {
-      const authTokenIsValid = await Passage.isAuthTokenValid(authToken);
+      const authTokenIsValid = await passage.isAuthTokenValid(authToken);
       if (!authTokenIsValid) {
         try {
-          await Passage.refreshAuthToken();
+          await passage.refreshAuthToken();
         } catch (error) {
           // If error, refresh token is likely expired. User will be signed out.
         }
@@ -81,14 +83,14 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const checkForAuthenticatedUser = async () => {
-    const user = await Passage.getCurrentUser();
+    const user = await passage.getCurrentUser();
     setCurrentUser(user);
   };
 
   const login = async (identifier: string) => {
     try {
-      await Passage.loginWithPasskey();
-      const user = await Passage.getCurrentUser();
+      await passage.loginWithPasskey();
+      const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
@@ -103,13 +105,13 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const fallbackLogin = async (identifier: string) => {
     try {
-      const appInfo = await Passage.getAppInfo();
+      const appInfo = await passage.getAppInfo();
       if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await Passage.newLoginOneTimePasscode(identifier);
+        const otpId = await passage.newLoginOneTimePasscode(identifier);
         setAuthFallbackId(otpId);
         setAuthState(AuthState.AwaitingLoginVerificationOTP);
       } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await Passage.newLoginMagicLink(identifier);
+        const magicLinkId = await passage.newLoginMagicLink(identifier);
         setAuthFallbackId(magicLinkId);
         setAuthState(AuthState.AwaitingLoginVerificationMagicLink);
       }
@@ -121,8 +123,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (identifier: string) => {
     try {
-      await Passage.registerWithPasskey(identifier);
-      const user = await Passage.getCurrentUser();
+      await passage.registerWithPasskey(identifier);
+      const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
@@ -135,13 +137,13 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const fallbackRegister = async (identifier: string) => {
     try {
-      const appInfo = await Passage.getAppInfo();
+      const appInfo = await passage.getAppInfo();
       if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await Passage.newRegisterOneTimePasscode(identifier);
+        const otpId = await passage.newRegisterOneTimePasscode(identifier);
         setAuthFallbackId(otpId);
         setAuthState(AuthState.AwaitingRegisterVerificationOTP);
       } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await Passage.newRegisterMagicLink(identifier);
+        const magicLinkId = await passage.newRegisterMagicLink(identifier);
         setAuthFallbackId(magicLinkId);
         setAuthState(AuthState.AwaitingRegisterVerificationMagicLink);
       }
@@ -153,8 +155,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const activateOTP = async (otp: string) => {
     try {
-      await Passage.oneTimePasscodeActivate(otp, authFallbackId!);
-      const user = await Passage.getCurrentUser();
+      await passage.oneTimePasscodeActivate(otp, authFallbackId!);
+      const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       presentAlert('Problem with passcode', 'Please try again');
@@ -165,8 +167,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     const isNewUser = authState === AuthState.AwaitingRegisterVerificationOTP;
     try {
       const newOtpId = isNewUser ?
-        await Passage.newRegisterOneTimePasscode(userIdentifer!) :
-        await Passage.newLoginOneTimePasscode(userIdentifer!);
+        await passage.newRegisterOneTimePasscode(userIdentifer!) :
+        await passage.newLoginOneTimePasscode(userIdentifer!);
       setAuthFallbackId(newOtpId);
     } catch (error) {
       presentAlert('Problem resending passcode', 'Please try again');
@@ -175,9 +177,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const checkMagicLink = async (magicLinkId: string | null) => {
     try {
-      const authResult = await Passage.getMagicLinkStatus(magicLinkId!);
+      const authResult = await passage.getMagicLinkStatus(magicLinkId!);
       if (authResult !== null) {
-        const user = await Passage.getCurrentUser();
+        const user = await passage.getCurrentUser();
         setCurrentUser(user);
       }
     } catch (error) {
@@ -189,8 +191,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     const isNewUser = authState === AuthState.AwaitingRegisterVerificationMagicLink;
     try {
       const newMagicLinkId = isNewUser ?
-        await Passage.newRegisterMagicLink(userIdentifer!) :
-        await Passage.newLoginMagicLink(userIdentifer!);
+        await passage.newRegisterMagicLink(userIdentifer!) :
+        await passage.newLoginMagicLink(userIdentifer!);
       setAuthFallbackId(newMagicLinkId);
       presentAlert('Success', 'Magic link resent');
     } catch (error) {
@@ -205,8 +207,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
    */
   const handleDeepMagicLink = async (magicLink: string) => {
     try {
-      await Passage.magicLinkActivate(magicLink);
-      const user = await Passage.getCurrentUser();
+      await passage.magicLinkActivate(magicLink);
+      const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       presentAlert('Invalid magic link', 'Magic link is no longer active.');
@@ -215,9 +217,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const addPasskey = async () => {
     try {
-      await Passage.addPasskey();
+      await passage.addPasskey();
       // Get updated user to get new list of passkeys.
-      const user = await Passage.getCurrentUser();
+      const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       presentAlert('Problem adding passkey', 'Please try again.');
@@ -226,7 +228,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     setCurrentUser(null);
-    await Passage.signOut();
+    await passage.signOut();
   };
 
   const presentAlert = (title: string, message: string) => {

@@ -1,4 +1,4 @@
-<img src="https://storage.googleapis.com/passage-docs/passage-logo-gradient.svg" alt="Passage logo" style="width:250px;"/>
+<img src="https://storage.googleapis.com/passage-docs/Lockup%20Vertical%20color.png" alt="Passage logo" style="width:250px;"/>
 
 # Example React Native App with Passage Auth
 
@@ -32,29 +32,32 @@ cd ios && pod install && cd ..
 ```
 
 ## Configuration
-To get this example React Native app working with your Passage account/app, you'll need to swap out the placeholder app id and authentication origin with your own. Learn more about Passage app ids and auth origins [here](https://docs.passage.id/console-administration/apps#app-core-settings).
+To get this example React Native app working with your Passage account/app, you'll need to swap out the placeholder authentication origin with your own. Learn more about Passage auth origins [here](https://docs.passage.id/console-administration/apps#app-core-settings).
 
 
 ### iOS
-In the `Passage.plist` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/ios/Passage.plist)) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively.
-
-<img width="600" alt="Passage.plist screenshot" src="https://storage.googleapis.com/passage-docs/passage-ios-plist.png">
-Also, you'll need to open up Xcode and replace `YOUR_AUTH_ORIGIN` in the Associated Domains section.
+You'll need to open up Xcode and replace `YOUR_AUTH_ORIGIN` in the Associated Domains section.
 <img width="600" alt="Passage iOS entitlement setup" src="https://storage.googleapis.com/passage-docs/passage-ios-entitlements.png">
 
 ### Android
 
-In the `strings.xml` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/android/app/src/main/res/values/strings.xml)) replace `YOUR_APP_ID` and `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively.
+In the `strings.xml` file ([found here](https://github.com/passageidentity/example-react-native/blob/main/android/app/src/main/res/values/strings.xml)) replace `YOUR_AUTH_ORIGIN` with your app’s Passage app id and auth origin, respectively.
 
 ```xml
 <resources>
     <string name="app_name">ExampleReactNative</string>
 
     <!-- Required Passage app settings -->
-    <string name="passage_app_id">YOUR_APP_ID</string> 
     <string name="passage_auth_origin">YOUR_APP_ORIGIN</string>
     ...
 </resources>
+```
+
+### Final step
+Lastly, replace `YOUR_APP_ID` in the `PassageContext.tsx` file [here](https://github.com/passageidentity/example-react-native/blob/main/app/contexts/PassageContext.tsx).
+
+```typescript
+const passage = new Passage('YOUR_APP_ID');
 ```
 
 ## 🚀 Run the app!
