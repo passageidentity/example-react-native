@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert, AlertButton } from 'react-native';
 import Passage, {
   PassageUser,
-  AllowedFallbackAuth,
   PassageError,
   PassageErrorCode,
 } from '@passageidentity/passage-react-native';
@@ -89,7 +88,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (identifier: string) => {
     try {
-      await passage.loginWithPasskey();
+      await passage.loginWithPasskey(identifier);
       const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
@@ -105,16 +104,16 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const fallbackLogin = async (identifier: string) => {
     try {
-      const appInfo = await passage.getAppInfo();
-      if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await passage.newLoginOneTimePasscode(identifier);
-        setAuthFallbackId(otpId);
-        setAuthState(AuthState.AwaitingLoginVerificationOTP);
-      } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await passage.newLoginMagicLink(identifier);
-        setAuthFallbackId(magicLinkId);
-        setAuthState(AuthState.AwaitingLoginVerificationMagicLink);
-      }
+      // Passage apps come with One-Time Passcodes enabled by default.
+      const otpId = await passage.newLoginOneTimePasscode(identifier);
+      setAuthFallbackId(otpId);
+      setAuthState(AuthState.AwaitingLoginVerificationOTP);
+      // If you opt-in to use Magic Links instead, use this code:
+      /*
+      const magicLinkId = await passage.newLoginMagicLink(identifier);
+      setAuthFallbackId(magicLinkId);
+      setAuthState(AuthState.AwaitingLoginVerificationMagicLink);
+      */
       setUserIdentifier(identifier);
     } catch (error) {
       console.error(error);
@@ -137,16 +136,16 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const fallbackRegister = async (identifier: string) => {
     try {
-      const appInfo = await passage.getAppInfo();
-      if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await passage.newRegisterOneTimePasscode(identifier);
-        setAuthFallbackId(otpId);
-        setAuthState(AuthState.AwaitingRegisterVerificationOTP);
-      } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await passage.newRegisterMagicLink(identifier);
-        setAuthFallbackId(magicLinkId);
-        setAuthState(AuthState.AwaitingRegisterVerificationMagicLink);
-      }
+      // Passage apps come with One-Time Passcodes enabled by default.
+      const otpId = await passage.newRegisterOneTimePasscode(identifier);
+      setAuthFallbackId(otpId);
+      setAuthState(AuthState.AwaitingRegisterVerificationOTP);
+      // If you opt-in to use Magic Links instead, use this code:
+      /*
+      const magicLinkId = await passage.newRegisterMagicLink(identifier);
+      setAuthFallbackId(magicLinkId);
+      setAuthState(AuthState.AwaitingRegisterVerificationMagicLink);
+      */
       setUserIdentifier(identifier);
     } catch (error) {
       console.error(error);
