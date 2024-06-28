@@ -11,8 +11,9 @@ interface PassageContextType {
   currentUser: PassageUser | null;
   userIdentifer: string | null;
   authFallbackId: string | null;
-  login: (identifier: string) => Promise<void>;
-  register: (identifier: string) => Promise<void>;
+  passkeyAuth: (identifier: string, login: boolean) => Promise<void>;
+  otpAuth: (identifier: string, login: boolean) => Promise<void>;
+  magicLinkAuth: (identifier: string, login: boolean) => Promise<void>;
   activateOTP: (otp: string) => Promise<void>;
   resendOTP: () => Promise<void>;
   checkMagicLink: (magicLinkId: string | null) => Promise<void>;
@@ -86,69 +87,47 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(user);
   };
 
-  const login = async (identifier: string) => {
+  const passkeyAuth = async (identifier: string, login: boolean) => {
     try {
-      await passage.loginWithPasskey(identifier);
+      if (login) {
+        await passage.loginWithPasskey(identifier);
+      } else {
+        await passage.registerWithPasskey(identifier);
+      }
       const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
         // User cancelled native passkey prompt, do nothing.
       } else {
-        if (identifier.length) {
-          await fallbackLogin(identifier);
-        }
+        presentAlert('Problem with passkey authentication.', 'Please try again');
       }
     }
   };
 
-  const fallbackLogin = async (identifier: string) => {
+  const otpAuth = async (identifier: string, login: boolean) => {
     try {
-      // Passage apps come with One-Time Passcodes enabled by default.
-      const otpId = await passage.newLoginOneTimePasscode(identifier);
+      const otpId = login ?
+        await passage.newLoginOneTimePasscode(identifier) :
+        await passage.newRegisterOneTimePasscode(identifier);
       setAuthFallbackId(otpId);
       setAuthState(AuthState.AwaitingLoginVerificationOTP);
-      // If you opt-in to use Magic Links instead, use this code:
-      /*
-      const magicLinkId = await passage.newLoginMagicLink(identifier);
-      setAuthFallbackId(magicLinkId);
-      setAuthState(AuthState.AwaitingLoginVerificationMagicLink);
-      */
       setUserIdentifier(identifier);
     } catch (error) {
-      console.error(error);
+      presentAlert('Problem with OTP authentication.', 'Please try again');
     }
   };
 
-  const register = async (identifier: string) => {
+  const magicLinkAuth = async (identifier: string, login: boolean) => {
     try {
-      await passage.registerWithPasskey(identifier);
-      const user = await passage.getCurrentUser();
-      setCurrentUser(user);
-    } catch (error) {
-      if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
-        // User cancelled native passkey prompt, do nothing.
-      } else {
-        await fallbackRegister(identifier);
-      }
-    }
-  };
-
-  const fallbackRegister = async (identifier: string) => {
-    try {
-      // Passage apps come with One-Time Passcodes enabled by default.
-      const otpId = await passage.newRegisterOneTimePasscode(identifier);
+      const otpId = login ?
+        await passage.newLoginOneTimePasscode(identifier) :
+        await passage.newRegisterOneTimePasscode(identifier);
       setAuthFallbackId(otpId);
-      setAuthState(AuthState.AwaitingRegisterVerificationOTP);
-      // If you opt-in to use Magic Links instead, use this code:
-      /*
-      const magicLinkId = await passage.newRegisterMagicLink(identifier);
-      setAuthFallbackId(magicLinkId);
-      setAuthState(AuthState.AwaitingRegisterVerificationMagicLink);
-      */
+      setAuthState(AuthState.AwaitingLoginVerificationOTP);
       setUserIdentifier(identifier);
     } catch (error) {
-      console.error(error);
+      presentAlert('Problem with Magic Link authentication.', 'Please try again');
     }
   };
 
@@ -163,9 +142,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendOTP = async () => {
-    const isNewUser = authState === AuthState.AwaitingRegisterVerificationOTP;
+    const login = authState === AuthState.AwaitingRegisterVerificationOTP;
     try {
-      const newOtpId = isNewUser ?
+      const newOtpId = login ?
         await passage.newRegisterOneTimePasscode(userIdentifer!) :
         await passage.newLoginOneTimePasscode(userIdentifer!);
       setAuthFallbackId(newOtpId);
@@ -187,9 +166,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendMagicLink = async () => {
-    const isNewUser = authState === AuthState.AwaitingRegisterVerificationMagicLink;
+    const login = authState === AuthState.AwaitingRegisterVerificationMagicLink;
     try {
-      const newMagicLinkId = isNewUser ?
+      const newMagicLinkId = login ?
         await passage.newRegisterMagicLink(userIdentifer!) :
         await passage.newLoginMagicLink(userIdentifer!);
       setAuthFallbackId(newMagicLinkId);
@@ -241,8 +220,9 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     userIdentifer,
     authFallbackId,
     signOut,
-    login,
-    register,
+    passkeyAuth,
+    otpAuth,
+    magicLinkAuth,
     activateOTP,
     resendOTP,
     checkMagicLink,
