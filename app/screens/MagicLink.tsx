@@ -11,7 +11,7 @@ export const MagicLink: () => JSX.Element = () => {
     checkMagicLink,
     resendMagicLink,
     userIdentifer,
-    authFallbackId,
+    magicLinkId,
   } = usePassage();
 
   const isNewUser = authState === AuthState.AwaitingRegisterVerificationMagicLink;
@@ -23,12 +23,12 @@ export const MagicLink: () => JSX.Element = () => {
   // Check if magic link has been activated outside of app every 2 seconds.
   React.useEffect(() => {
     const intervalId = setInterval(() => {
-      checkMagicLink(authFallbackId);
+      checkMagicLink(magicLinkId);
     }, 2000);
     return () => {
       clearInterval(intervalId);
     };
-  }, [authFallbackId]);
+  }, [magicLinkId]);
 
   return (
     <View style={styles.container}>

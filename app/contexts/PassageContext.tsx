@@ -10,7 +10,8 @@ interface PassageContextType {
   authState: AuthState;
   currentUser: PassageUser | null;
   userIdentifer: string | null;
-  authFallbackId: string | null;
+  otpId: string | null;
+  magicLinkId: string | null;
   passkeyAuth: (identifier: string, login: boolean) => Promise<void>;
   otpAuth: (identifier: string, login: boolean) => Promise<void>;
   magicLinkAuth: (identifier: string, login: boolean) => Promise<void>;
@@ -47,7 +48,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const [currentUser, setCurrentUser] = useState<PassageUser | null>(null);
   const [authState, setAuthState] = useState<AuthState>(AuthState.Unauthenticated);
-  const [authFallbackId, setAuthFallbackId] = useState<string | null>(null);
+  const [otpId, setOtpId] = useState<string | null>(null);
+  const [magicLinkId, setMagicLinkId] = useState<string | null>(null);
   const [userIdentifer, setUserIdentifier] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,7 +112,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const otpId = login ?
         await passage.newLoginOneTimePasscode(identifier) :
         await passage.newRegisterOneTimePasscode(identifier);
-      setAuthFallbackId(otpId);
+      setOtpId(otpId);
       setAuthState(AuthState.AwaitingLoginVerificationOTP);
       setUserIdentifier(identifier);
     } catch (error) {
@@ -123,7 +125,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const otpId = login ?
         await passage.newLoginOneTimePasscode(identifier) :
         await passage.newRegisterOneTimePasscode(identifier);
-      setAuthFallbackId(otpId);
+      setMagicLinkId(otpId);
       setAuthState(AuthState.AwaitingLoginVerificationOTP);
       setUserIdentifier(identifier);
     } catch (error) {
@@ -133,7 +135,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const activateOTP = async (otp: string) => {
     try {
-      await passage.oneTimePasscodeActivate(otp, authFallbackId!);
+      await passage.oneTimePasscodeActivate(otp, otpId!);
       const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
@@ -147,7 +149,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const newOtpId = login ?
         await passage.newRegisterOneTimePasscode(userIdentifer!) :
         await passage.newLoginOneTimePasscode(userIdentifer!);
-      setAuthFallbackId(newOtpId);
+      setOtpId(newOtpId);
     } catch (error) {
       presentAlert('Problem resending passcode', 'Please try again');
     }
@@ -171,7 +173,7 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
       const newMagicLinkId = login ?
         await passage.newRegisterMagicLink(userIdentifer!) :
         await passage.newLoginMagicLink(userIdentifer!);
-      setAuthFallbackId(newMagicLinkId);
+      setMagicLinkId(newMagicLinkId);
       presentAlert('Success', 'Magic link resent');
     } catch (error) {
       presentAlert('Problem resending magic link', 'Please try again');
@@ -218,7 +220,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     authState,
     currentUser,
     userIdentifer,
-    authFallbackId,
+    otpId,
+    magicLinkId,
     signOut,
     passkeyAuth,
     otpAuth,
