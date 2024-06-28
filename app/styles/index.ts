@@ -49,6 +49,7 @@ export const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     paddingHorizontal: 12,
+    marginBottom: 8,
   },
   primaryButtonText: {
     color: 'white',

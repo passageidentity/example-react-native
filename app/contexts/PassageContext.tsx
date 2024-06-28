@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert, AlertButton } from 'react-native';
 import Passage, {
   PassageUser,
-  AllowedFallbackAuth,
   PassageError,
   PassageErrorCode,
 } from '@passageidentity/passage-react-native';
@@ -11,9 +10,11 @@ interface PassageContextType {
   authState: AuthState;
   currentUser: PassageUser | null;
   userIdentifer: string | null;
-  authFallbackId: string | null;
-  login: (identifier: string) => Promise<void>;
-  register: (identifier: string) => Promise<void>;
+  otpId: string | null;
+  magicLinkId: string | null;
+  passkeyAuth: (identifier: string, login: boolean) => Promise<void>;
+  otpAuth: (identifier: string, login: boolean) => Promise<void>;
+  magicLinkAuth: (identifier: string, login: boolean) => Promise<void>;
   activateOTP: (otp: string) => Promise<void>;
   resendOTP: () => Promise<void>;
   checkMagicLink: (magicLinkId: string | null) => Promise<void>;
@@ -47,7 +48,8 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
 
   const [currentUser, setCurrentUser] = useState<PassageUser | null>(null);
   const [authState, setAuthState] = useState<AuthState>(AuthState.Unauthenticated);
-  const [authFallbackId, setAuthFallbackId] = useState<string | null>(null);
+  const [otpId, setOtpId] = useState<string | null>(null);
+  const [magicLinkId, setMagicLinkId] = useState<string | null>(null);
   const [userIdentifer, setUserIdentifier] = useState<string | null>(null);
 
   useEffect(() => {
@@ -87,75 +89,53 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(user);
   };
 
-  const login = async (identifier: string) => {
+  const passkeyAuth = async (identifier: string, login: boolean) => {
     try {
-      await passage.loginWithPasskey();
+      if (login) {
+        await passage.loginWithPasskey(identifier);
+      } else {
+        await passage.registerWithPasskey(identifier);
+      }
       const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
       if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
         // User cancelled native passkey prompt, do nothing.
       } else {
-        if (identifier.length) {
-          await fallbackLogin(identifier);
-        }
+        presentAlert('Problem with passkey authentication.', 'Please try again');
       }
     }
   };
 
-  const fallbackLogin = async (identifier: string) => {
+  const otpAuth = async (identifier: string, login: boolean) => {
     try {
-      const appInfo = await passage.getAppInfo();
-      if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await passage.newLoginOneTimePasscode(identifier);
-        setAuthFallbackId(otpId);
-        setAuthState(AuthState.AwaitingLoginVerificationOTP);
-      } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await passage.newLoginMagicLink(identifier);
-        setAuthFallbackId(magicLinkId);
-        setAuthState(AuthState.AwaitingLoginVerificationMagicLink);
-      }
+      const otpId = login ?
+        await passage.newLoginOneTimePasscode(identifier) :
+        await passage.newRegisterOneTimePasscode(identifier);
+      setOtpId(otpId);
+      setAuthState(AuthState.AwaitingLoginVerificationOTP);
       setUserIdentifier(identifier);
     } catch (error) {
-      console.error(error);
+      presentAlert('Problem with OTP authentication.', 'Please try again');
     }
   };
 
-  const register = async (identifier: string) => {
+  const magicLinkAuth = async (identifier: string, login: boolean) => {
     try {
-      await passage.registerWithPasskey(identifier);
-      const user = await passage.getCurrentUser();
-      setCurrentUser(user);
-    } catch (error) {
-      if (error instanceof PassageError && error.code === PassageErrorCode.UserCancelled) {
-        // User cancelled native passkey prompt, do nothing.
-      } else {
-        await fallbackRegister(identifier);
-      }
-    }
-  };
-
-  const fallbackRegister = async (identifier: string) => {
-    try {
-      const appInfo = await passage.getAppInfo();
-      if (appInfo.authFallbackMethod === AllowedFallbackAuth.LoginCode) {
-        const otpId = await passage.newRegisterOneTimePasscode(identifier);
-        setAuthFallbackId(otpId);
-        setAuthState(AuthState.AwaitingRegisterVerificationOTP);
-      } else if (appInfo.authFallbackMethod === AllowedFallbackAuth.MagicLink) {
-        const magicLinkId = await passage.newRegisterMagicLink(identifier);
-        setAuthFallbackId(magicLinkId);
-        setAuthState(AuthState.AwaitingRegisterVerificationMagicLink);
-      }
+      const otpId = login ?
+        await passage.newLoginOneTimePasscode(identifier) :
+        await passage.newRegisterOneTimePasscode(identifier);
+      setMagicLinkId(otpId);
+      setAuthState(AuthState.AwaitingLoginVerificationOTP);
       setUserIdentifier(identifier);
     } catch (error) {
-      console.error(error);
+      presentAlert('Problem with Magic Link authentication.', 'Please try again');
     }
   };
 
   const activateOTP = async (otp: string) => {
     try {
-      await passage.oneTimePasscodeActivate(otp, authFallbackId!);
+      await passage.oneTimePasscodeActivate(otp, otpId!);
       const user = await passage.getCurrentUser();
       setCurrentUser(user);
     } catch (error) {
@@ -164,12 +144,12 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendOTP = async () => {
-    const isNewUser = authState === AuthState.AwaitingRegisterVerificationOTP;
+    const login = authState === AuthState.AwaitingRegisterVerificationOTP;
     try {
-      const newOtpId = isNewUser ?
+      const newOtpId = login ?
         await passage.newRegisterOneTimePasscode(userIdentifer!) :
         await passage.newLoginOneTimePasscode(userIdentifer!);
-      setAuthFallbackId(newOtpId);
+      setOtpId(newOtpId);
     } catch (error) {
       presentAlert('Problem resending passcode', 'Please try again');
     }
@@ -188,12 +168,12 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendMagicLink = async () => {
-    const isNewUser = authState === AuthState.AwaitingRegisterVerificationMagicLink;
+    const login = authState === AuthState.AwaitingRegisterVerificationMagicLink;
     try {
-      const newMagicLinkId = isNewUser ?
+      const newMagicLinkId = login ?
         await passage.newRegisterMagicLink(userIdentifer!) :
         await passage.newLoginMagicLink(userIdentifer!);
-      setAuthFallbackId(newMagicLinkId);
+      setMagicLinkId(newMagicLinkId);
       presentAlert('Success', 'Magic link resent');
     } catch (error) {
       presentAlert('Problem resending magic link', 'Please try again');
@@ -240,10 +220,12 @@ export function PassageProvider({ children }: { children: React.ReactNode }) {
     authState,
     currentUser,
     userIdentifer,
-    authFallbackId,
+    otpId,
+    magicLinkId,
     signOut,
-    login,
-    register,
+    passkeyAuth,
+    otpAuth,
+    magicLinkAuth,
     activateOTP,
     resendOTP,
     checkMagicLink,

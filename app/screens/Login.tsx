@@ -6,7 +6,11 @@ import { usePassage } from '../contexts/PassageContext';
 
 export const Login: () => JSX.Element = () => {
 
-  const { login, register } = usePassage();
+  const {
+    passkeyAuth,
+    otpAuth,
+    magicLinkAuth
+  } = usePassage();
 
   const [showLogin, setShowLogin] = React.useState(false);
   const [validEmail, setValidEmail] = React.useState(false);
@@ -19,14 +23,6 @@ export const Login: () => JSX.Element = () => {
     setEmailInput(input);
   };
 
-  const onPressContinue = async () => {
-    if (showLogin) {
-      await login(emailInput);
-    } else {
-      await register(emailInput);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{ showLogin ? 'Login' : 'Register' }</Text>
@@ -36,7 +32,6 @@ export const Login: () => JSX.Element = () => {
         autoCorrect={false}
         keyboardType='email-address'
         onChangeText={onChangeInput}
-        onFocus={() => showLogin && onPressContinue()}
         placeholder='example@email.com'
         returnKeyType='done'
         style={styles.input}
@@ -44,13 +39,33 @@ export const Login: () => JSX.Element = () => {
       />
       <Pressable
         disabled={!validEmail}
-        onPress={onPressContinue}
+        onPress={() => passkeyAuth(emailInput, showLogin)}
         style={[
           styles.primaryButton,
           { opacity: validEmail ? 1.0 : 0.3 }
         ]}
       >
-        <Text style={styles.primaryButtonText}>Continue</Text>
+        <Text style={styles.primaryButtonText}>Continue with Passkey</Text>
+      </Pressable>
+      <Pressable
+        disabled={!validEmail}
+        onPress={() => otpAuth(emailInput, showLogin)}
+        style={[
+          styles.primaryButton,
+          { opacity: validEmail ? 1.0 : 0.3 }
+        ]}
+      >
+        <Text style={styles.primaryButtonText}>Continue with One-Time Passcode</Text>
+      </Pressable>
+      <Pressable
+        disabled={!validEmail}
+        onPress={() => magicLinkAuth(emailInput, showLogin)}
+        style={[
+          styles.primaryButton,
+          { opacity: validEmail ? 1.0 : 0.3 }
+        ]}
+      >
+        <Text style={styles.primaryButtonText}>Continue with Magic Link</Text>
       </Pressable>
       <Pressable
         onPress={() => setShowLogin(!showLogin)}

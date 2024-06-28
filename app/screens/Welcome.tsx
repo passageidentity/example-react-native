@@ -17,7 +17,7 @@ export const Welcome: () => JSX.Element = () => {
       <Text style={styles.title}>Welcome</Text>
       <Text style={styles.body}>{currentUser.email}</Text>
       {
-        currentUser.webauthnDevices.length && 
+        currentUser.webauthnDevices.length ? 
           <View style={{ marginBottom: 22 }}>
             <Text style={styles.subtitle}>User passkeys</Text>
             {currentUser.webauthnDevices.map((device) => (
@@ -26,6 +26,7 @@ export const Welcome: () => JSX.Element = () => {
               </Text>
             ))}
           </View>
+          : null
       }
       <Pressable
         onPress={addPasskey}
