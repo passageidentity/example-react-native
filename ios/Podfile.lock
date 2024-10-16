@@ -1,4 +1,5 @@
 PODS:
+  - AnyCodable-FlightSchool (0.6.1)
   - boost (1.76.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.72.1)
@@ -15,11 +16,11 @@ PODS:
     - hermes-engine/Pre-built (= 0.72.1)
   - hermes-engine/Pre-built (0.72.1)
   - libevent (2.1.12)
-  - Passage (1.6.0):
-    - SwiftKeychainWrapper
-  - passage-react-native (0.6.1):
-    - Passage (= 1.6.0)
+  - passage-react-native (1.0):
+    - PassageSwift (= 1.0.1)
     - React-Core
+  - PassageSwift (1.0.1):
+    - AnyCodable-FlightSchool (= 0.6.1)
   - RCT-Folly (2021.07.22.00):
     - boost
     - DoubleConversion
@@ -430,7 +431,6 @@ PODS:
     - React-logger (= 0.72.1)
     - React-perflogger (= 0.72.1)
   - SocketRocket (0.6.1)
-  - SwiftKeychainWrapper (4.0.1)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -479,11 +479,11 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AnyCodable-FlightSchool
     - fmt
     - libevent
-    - Passage
+    - PassageSwift
     - SocketRocket
-    - SwiftKeychainWrapper
 
 EXTERNAL SOURCES:
   boost:
@@ -569,6 +569,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AnyCodable-FlightSchool: 9d48ed579c898378e189bb0a89faebf9eb8a46a7
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   FBLazyVector: 55cd4593d570bd9e5e227488d637ce6a9581ce51
@@ -577,8 +578,8 @@ SPEC CHECKSUMS:
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   hermes-engine: 9df83855a0fd15ef8eb61694652bae636b0c466e
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
-  Passage: 347004a76cb6677646c1f46ea48766cab5e9eb8a
-  passage-react-native: 1bceb17aaaf2b94dbb020b29cc65d000843163cb
+  passage-react-native: 393a7bcb9e6af8ea4ab086672fdce5bc21974b53
+  PassageSwift: 56391a2ef6d78cbaf55c2d2e39eeba1ce2b7fa87
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: c52ee8fb2b35c1b54031dd8e92d88ad4dba8f2ce
   RCTTypeSafety: 75fa444becadf0ebfa0a456b8c64560c7c89c7df
@@ -612,7 +613,6 @@ SPEC CHECKSUMS:
   React-utils: 0a70ea97d4e2749f336b450c082905be1d389435
   ReactCommon: e593d19c9e271a6da4d0bd7f13b28cfeae5d164b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  SwiftKeychainWrapper: 807ba1d63c33a7d0613288512399cd1eda1e470c
   Yoga: 65286bb6a07edce5e4fe8c90774da977ae8fc009
 
 PODFILE CHECKSUM: a8cbc781972ac2e2e4a608277312b37f6264b0d8
